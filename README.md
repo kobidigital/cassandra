@@ -12,20 +12,31 @@ See a change merged here that doesn't show up on the Docker Hub yet? Check [the 
 
 # Usage
 
+### Add label to nodes
+```
+docker node update --label-add "cassandra" machine1
+docker node update --label-add "cassandra" machine2
+```
+
+### Create network
+```
+docker network create --driver overlay my-network
+```
+
+### Run service
 ```
 docker service create --name cassandra \
-  --label 'com.mynet.service == cassandra' \
   --mode global \
-  --network mynetwork \
-  --constraint 'node.label == cassandra' \
-  -e 'CASSANDRA_SEEDS=tasks.cassandra' \
-  -e 'CASSANDRA_BROADCAST_ADDRESS=auto' \
-  -e 'CASSANDRA_LISTEN_ADDRESS=auto' \
+  --network my-network \
+  --constraint "node.label == cassandra" \
+  -e "SEEDS_COMMAND=nslookup tasks.cassandra | awk '/Address: /' | awk -F ' ' '{print $$2}' | xargs | sed -e 's/ /,/g'" \
+  -e "CASSANDRA_SEEDS=auto" \
+  -e "CASSANDRA_BROADCAST_ADDRESS=auto" \
+  -e "CASSANDRA_LISTEN_ADDRESS=auto" \
   --publish '7000:7000' \
   --publish '7001:7001' \
   --publish '7199:7199' \
   --publish '9042:9042' \
   --publish '9160:9160' \
-  --mount type=bind,dst=/var/lib/cassandra,src=/data/lib/cassandra \
-  webscam/cassandra:3.9
+  kobitech/cassandra
 ```

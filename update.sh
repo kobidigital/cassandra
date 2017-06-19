@@ -18,6 +18,7 @@ for version in "${versions[@]}"; do
 	(
 		set -x
 		cp docker-entrypoint.sh "$version/"
+		cp cassandra.yaml "$version/"
 		sed 's/%%CASSANDRA_DIST%%/'$dist'/g; s/%%CASSANDRA_VERSION%%/'$fullVersion'/g' Dockerfile.template > "$version/Dockerfile"
 	)
 	
